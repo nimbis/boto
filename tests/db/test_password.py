@@ -74,7 +74,7 @@ class PasswordPropertyTest(unittest.TestCase):
 
         obj = MyModel()
         obj.password = 'bar'
-        expected = myhashfunc('bar').hexdigest() #hmac.new('mysecret','bar').hexdigest()
+        expected = myhashfunc('bar', usedforsecurity=False).hexdigest() #hmac.new('mysecret','bar').hexdigest()
         log.debug("\npassword=%s\nexpected=%s" % (obj.password, expected))
         self.assertTrue(obj.password == 'bar' )
         obj.save()

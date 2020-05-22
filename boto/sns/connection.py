@@ -344,7 +344,7 @@ class SNSConnection(AWSQueryConnection):
         """
         t = queue.id.split('/')
         q_arn = queue.arn
-        sid = hashlib.md5((topic + q_arn).encode('utf-8')).hexdigest()
+        sid = hashlib.md5((topic + q_arn).encode('utf-8'), usedforsecurity=False).hexdigest()
         sid_exists = False
         resp = self.subscribe(topic, 'sqs', q_arn)
         attr = queue.get_attributes('Policy')
