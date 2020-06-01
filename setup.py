@@ -46,7 +46,7 @@ def readme():
         return f.read()
 
 setup(name = "boto",
-      version = "{0}+nimbis.1".format(__version__),
+      version = "{0}+nimbis.2".format(__version__),
       description = "Amazon Web Services Library",
       long_description = readme(),
       author = "Mitch Garnaat",
