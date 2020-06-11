@@ -62,7 +62,16 @@ class SNSSubcribeSQSTest(unittest.TestCase):
                 ['TopicArn']
         self.addCleanup(self.snsc.delete_topic, topic_arn)
 
-        expected_sid = hashlib.md5((topic_arn + queue_arn).encode('utf-8'), usedforsecurity=False).hexdigest()
+        # Current stable version of python does not have FIPS support for hashlib. Passing
+        # usedforsecurity=False only works in RHEL versions of python, and is needed to
+        # run this code on hardened RHEL machines. The try-except block will not be needed once
+        # the following issue is resolved:
+        #
+        # https://bugs.python.org/issue9216
+        try:
+            expected_sid = hashlib.md5((topic_arn + queue_arn).encode('utf-8'), usedforsecurity=False).hexdigest()
+        except TypeError:
+            expected_sid = hashlib.md5((topic_arn + queue_arn).encode('utf-8')).hexdigest()
         resp = self.snsc.subscribe_sqs_queue(topic_arn, queue)
 
         found_expected_sid = False
