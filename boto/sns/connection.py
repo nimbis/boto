@@ -344,7 +344,18 @@ class SNSConnection(AWSQueryConnection):
         """
         t = queue.id.split('/')
         q_arn = queue.arn
-        sid = hashlib.md5((topic + q_arn).encode('utf-8'), usedforsecurity=False).hexdigest()
+
+        # Current stable version of python does not have FIPS support for hashlib. Passing
+        # usedforsecurity=False only works in RHEL versions of python, and is needed to
+        # run this code on hardened RHEL machines. The try-except block will not be needed once
+        # the following issue is resolved:
+        #
+        # https://bugs.python.org/issue9216
+        try:
+            sid = hashlib.md5((topic + q_arn).encode('utf-8'), usedforsecurity=False).hexdigest()
+        except TypeError:
+            sid = hashlib.md5((topic + q_arn).encode('utf-8')).hexdigest()
+
         sid_exists = False
         resp = self.subscribe(topic, 'sqs', q_arn)
         attr = queue.get_attributes('Policy')

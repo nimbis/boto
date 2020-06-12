@@ -1006,7 +1006,17 @@ def compute_md5(fp, buf_size=8192, size=None):
 
 def compute_hash(fp, buf_size=8192, size=None, hash_algorithm=md5):
     if hash_algorithm == md5:
-        hash_obj = hash_algorithm(usedforsecurity=False)
+
+        # Current stable version of python does not have FIPS support for hashlib. Passing
+        # usedforsecurity=False only works in RHEL versions of python, and is needed to
+        # run this code on hardened RHEL machines. The try-except block will not be needed once
+        # the following issue is resolved:
+        #
+        # https://bugs.python.org/issue9216
+        try:
+            hash_obj = hash_algorithm(usedforsecurity=False)
+        except TypeError:
+            hash_obj = hash_algorithm()
     else:
         hash_obj = hash_algorithm()
     spos = fp.tell()

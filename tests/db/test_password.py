@@ -74,7 +74,18 @@ class PasswordPropertyTest(unittest.TestCase):
 
         obj = MyModel()
         obj.password = 'bar'
-        expected = myhashfunc('bar', usedforsecurity=False).hexdigest() #hmac.new('mysecret','bar').hexdigest()
+
+        # Current stable version of python does not have FIPS support for hashlib. Passing
+        # usedforsecurity=False only works in RHEL versions of python, and is needed to
+        # run this code on hardened RHEL machines. The try-except block will not be needed once
+        # the following issue is resolved:
+        #
+        # https://bugs.python.org/issue9216
+        try:
+            expected = myhashfunc('bar', usedforsecurity=False).hexdigest() #hmac.new('mysecret','bar').hexdigest()
+        except TypeError:
+            expected = myhashfunc('bar').hexdigest() #hmac.new('mysecret','bar').hexdigest()
+
         log.debug("\npassword=%s\nexpected=%s" % (obj.password, expected))
         self.assertTrue(obj.password == 'bar' )
         obj.save()
